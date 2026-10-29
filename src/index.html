@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Alerta Quito (prototipo)</title>
+  <meta name="description" content="Prototipo de la interfaz de Alerta Quito: reporte de incidentes viales y de seguridad en Quito">
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Etiqueta discreta de "prototipo": se abre al tocarla y no tapa la pantalla */
+    #aviso-prototipo { position: fixed; right: 14px; bottom: 14px; z-index: 99999; font: 13px/1.45 Cabin, Arial, sans-serif; color: #1b2a41; }
+    #aviso-prototipo summary { list-style: none; cursor: pointer; display: inline-block; float: right; padding: 5px 12px; border-radius: 999px;
+      background: #f1e7dd; border: 1.5px solid #b48c5d; font-weight: 700; letter-spacing: .08em; font-size: 11px; box-shadow: 0 2px 8px rgba(0, 0, 0, .18); }
+    #aviso-prototipo summary::-webkit-details-marker { display: none; }
+    #aviso-prototipo[open] summary { margin-top: 8px; }
+    #aviso-prototipo .panel { clear: both; width: 270px; padding: 12px 14px; border-radius: 10px; background: #f1e7dd; border: 1.5px solid #b48c5d;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .22); }
+    #aviso-prototipo .panel p { margin: 0 0 6px; }
+    #aviso-prototipo .panel ul { margin: 0; padding-left: 16px; }
+    #aviso-prototipo .panel code { color: #283d60; font-weight: 700; }
+    #aviso-prototipo .panel small { display: block; margin-top: 6px; color: #5b6472; }
+  </style>
+</head>
+<body>
+  <app-root></app-root>
+  <details id="aviso-prototipo">
+    <summary>PROTOTIPO</summary>
+    <div class="panel">
+      <p><strong>Datos de ejemplo.</strong> No hay servidor: al recargar, todo vuelve al inicio.</p>
+      <p style="margin-bottom:2px">Usuarios (cualquier contraseña):</p>
+      <ul>
+        <li><code>ciudadano.demo</code></li>
+        <li><code>func.epmmop</code> / <code>func.policia</code></li>
+        <li><code>admin</code></li>
+      </ul>
+      <small>Es solo la interfaz; el sistema completo está en la rama main.</small>
+    </div>
+  </details>
+</body>
+</html>

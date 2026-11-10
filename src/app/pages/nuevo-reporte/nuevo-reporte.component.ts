@@ -49,6 +49,7 @@ const MAX_DETALLE = 500;
         <div class="alert alert-warning mt-3 mb-0" role="note">
           <i class="fa fa-exclamation-triangle me-2" aria-hidden="true"></i>
           Este incidente se trata como emergencia y llega primero a la entidad. Si hay peligro inmediato, llame también al 911.
+          <strong>La foto es opcional:</strong> no arriesgue su seguridad por tomarla; envíe la alerta con el tipo y el lugar.
           Puede <strong>dictar el detalle por voz</strong> con el micrófono.
         </div>
       }
@@ -111,8 +112,8 @@ const MAX_DETALLE = 500;
         </div>
       </div>
 
-      <h4 class="subtitulo">3. Evidencia</h4>
-      <label class="form-label" for="foto">Foto del incidente (JPG, PNG o WEBP, máximo 5 MB)</label>
+      <h4 class="subtitulo">3. Evidencia {{ tipo()?.esEmergencia ? '(opcional en emergencias)' : '' }}</h4>
+      <label class="form-label" for="foto">Foto del incidente (JPG, PNG o WEBP, máximo 5 MB){{ tipo()?.esEmergencia ? ' - opcional' : '' }}</label>
       <input id="foto" class="form-control" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" (change)="elegirFoto($event)" />
       @if (vistaPrevia()) {
         <img class="foto-previa" [src]="vistaPrevia()" alt="Vista previa de la foto del incidente" />
@@ -165,7 +166,7 @@ const MAX_DETALLE = 500;
       <div class="mt-4">
         <button class="btn btn-primary" type="button" (click)="enviar()" [disabled]="enviando()">
           <i class="fa fa-paper-plane me-2" aria-hidden="true"></i>
-          {{ enviando() ? 'Enviando...' : 'Enviar reporte' }}
+          {{ enviando() ? 'Enviando...' : tipo()?.esEmergencia ? 'Enviar alerta ahora' : 'Enviar reporte' }}
         </button>
       </div>
     </div>
@@ -369,7 +370,7 @@ export class NuevoReporteComponent implements OnInit, OnDestroy {
     if (!tipo) return this.error.set('Elija el tipo de incidente.');
     if (!ubicacion) return this.error.set('Marque el lugar en el mapa.');
     if (!estaEnQuito(ubicacion.lat, ubicacion.lng)) return this.error.set('La ubicación debe estar dentro de Quito.');
-    if (!this.foto) return this.error.set('Adjunte una foto del incidente.');
+    if (!this.foto && !tipo.esEmergencia) return this.error.set('Adjunte una foto del incidente.');
 
     this.sesionDictado?.detener();
     this.enviando.set(true);

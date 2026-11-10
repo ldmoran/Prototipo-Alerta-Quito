@@ -14,6 +14,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { MisReportesComponent } from './pages/mis-reportes/mis-reportes.component';
 import { NuevoReporteComponent } from './pages/nuevo-reporte/nuevo-reporte.component';
 import { RegistroComponent } from './pages/registro/registro.component';
+import { VerificarCuentaComponent } from './pages/verificar-cuenta/verificar-cuenta.component';
 import { ReporteDetalleComponent } from './pages/reporte-detalle/reporte-detalle.component';
 
 export const routes: Routes = [
@@ -21,6 +22,7 @@ export const routes: Routes = [
   { path: 'olvide-password', component: OlvidePasswordComponent, canActivate: [soloInvitadoGuard], title: 'Recuperar contraseña · Alerta Quito' },
   { path: 'restablecer', component: RestablecerPasswordComponent, title: 'Nueva contraseña · Alerta Quito' },
   { path: 'registro', component: RegistroComponent, canActivate: [soloInvitadoGuard], title: 'Crear cuenta · Alerta Quito' },
+  { path: 'verificar-cuenta', component: VerificarCuentaComponent, canActivate: [soloInvitadoGuard], title: 'Verificar cuenta · Alerta Quito' },
   {
     path: 'cambiar-password',
     component: CambiarPasswordComponent,

@@ -138,6 +138,8 @@ export interface Estadisticas {
   total: number;
   porEstado: Record<string, number>;
   porTipo: Record<string, number>;
+  /** Reportes que siguen en "Registrado" más allá del tiempo esperado (emergencias: 30 min; los demás: 48 h). */
+  sinRespuesta?: number;
 }
 
 export interface EdicionFuncionario {

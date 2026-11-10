@@ -37,10 +37,11 @@ export class ApiService {
     return this.http.get<Entidad[]>(`${this.base}/entidades`);
   }
 
-  crearReporte(datos: NuevoReporte, foto: File): Observable<ReporteDetalle> {
+  /** La foto es obligatoria salvo en emergencias, donde pedir ayuda no debe esperar a tomar una foto. */
+  crearReporte(datos: NuevoReporte, foto: File | null): Observable<ReporteDetalle> {
     const form = new FormData();
     form.append('datos', new Blob([JSON.stringify(datos)], { type: 'application/json' }));
-    form.append('foto', foto);
+    if (foto) form.append('foto', foto);
     return this.http.post<ReporteDetalle>(`${this.base}/reportes`, form);
   }
 

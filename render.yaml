@@ -1,0 +1,16 @@
+# Despliegue del PROTOTIPO en Render (sitio estático, sin servidor ni base de datos).
+# Render lee este archivo como "Blueprint": New + > Blueprint > elegir este repositorio.
+services:
+  - type: web
+    name: alerta-quito-prototipo
+    runtime: static
+    buildCommand: npm ci --no-audit --no-fund && npm run build -- --configuration production
+    staticPublishPath: dist/alerta-quito-interfaz/browser
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+    # La aplicación es de una sola página: cualquier ruta (por ejemplo /login) debe devolver index.html.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

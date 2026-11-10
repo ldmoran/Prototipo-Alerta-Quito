@@ -81,6 +81,11 @@ export class LoginComponent {
     this.auth.login(usuario.trim(), password).subscribe({
       next: () => void this.router.navigate([this.auth.rutaInicio()]),
       error: (e) => {
+        const cuerpo = (e?.error ?? {}) as { codigo?: string; correo?: string };
+        if (cuerpo.codigo === 'CUENTA_SIN_VERIFICAR') {
+          void this.router.navigate(['/verificar-cuenta'], { queryParams: { usuario: usuario.trim(), correo: cuerpo.correo } });
+          return;
+        }
         this.error.set(mensajeDeError(e));
         this.cargando.set(false);
       },

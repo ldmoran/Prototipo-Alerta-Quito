@@ -10,11 +10,26 @@ import { EstadoChipComponent, PrioridadChipComponent } from '../../shared/insign
 import { MapaComponent, PuntoMapa } from '../../shared/mapa.component';
 
 const CADA_MS = 10_000;
+const HORA_MS = 3_600_000;
+/** Tiempo máximo esperado antes de marcar un reporte "Registrado" como sin respuesta. */
+const LIMITE_EMERGENCIA_H = 0.5;
+const LIMITE_NORMAL_H = 48;
 
 @Component({
   selector: 'app-bandeja',
   standalone: true,
   imports: [DatePipe, RouterLink, MapaComponent, EstadoChipComponent, PrioridadChipComponent],
+  styles: [
+    `
+      .sin-respuesta {
+        color: #c62828;
+        font-weight: 700;
+        font-size: 0.78rem;
+        white-space: nowrap;
+        margin-right: 0.5rem;
+      }
+    `,
+  ],
   template: `
     <div class="dashboard-section">
       <div class="section-heading">
@@ -32,6 +47,12 @@ const CADA_MS = 10_000;
         <div class="alert alert-danger py-2" role="alert">
           <i class="fa fa-bell me-2" aria-hidden="true"></i>
           Llegaron {{ nuevasEmergencias() }} reporte(s) de prioridad crítica.
+        </div>
+      }
+      @if (sinRespuestaTotal() > 0) {
+        <div class="alert alert-warning py-2" role="alert">
+          <i class="fa fa-clock-o me-2" aria-hidden="true"></i>
+          Hay {{ sinRespuestaTotal() }} reporte(s) sin respuesta. Atiéndalos o cámbielos de estado.
         </div>
       }
       @if (error()) {
@@ -53,6 +74,11 @@ const CADA_MS = 10_000;
                   <small>{{ r.codigo }} - {{ r.fechaCreacion | date: 'dd/MM HH:mm' }} - {{ r.direccion || 'Sin dirección' }}</small>
                 </span>
                 <app-prioridad-chip [prioridad]="r.prioridad" />
+                @if (sinRespuesta(r)) {
+                  <span class="sin-respuesta" title="Lleva más tiempo del esperado sin que la entidad lo atienda">
+                    Sin respuesta · {{ horas(r) }} h
+                  </span>
+                }
                 <app-estado-chip [estado]="r.estado" />
               </a>
             </li>
@@ -82,6 +108,18 @@ export class BandejaComponent implements OnInit, OnDestroy {
       color: COLOR_PRIORIDAD[r.prioridad] ?? '#607d8b',
     })),
   );
+
+  readonly sinRespuestaTotal = computed(() => this.reportes().filter((r) => this.sinRespuesta(r)).length);
+
+  horas(r: ReporteResumen): number {
+    return Math.floor((Date.now() - new Date(r.fechaCreacion).getTime()) / HORA_MS);
+  }
+
+  sinRespuesta(r: ReporteResumen): boolean {
+    if (r.estado !== 'REGISTRADO') return false;
+    const transcurridas = (Date.now() - new Date(r.fechaCreacion).getTime()) / HORA_MS;
+    return transcurridas > (r.prioridad === 1 ? LIMITE_EMERGENCIA_H : LIMITE_NORMAL_H);
+  }
 
   private suscripcion?: Subscription;
   private conocidos = new Set<number>();

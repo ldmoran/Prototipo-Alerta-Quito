@@ -38,14 +38,24 @@ interface UsuarioMaqueta {
   usuario: string;
   nombre: string;
   perfil: 'CIUDAD' | 'FUNCIO' | 'ADMINI';
+  /** Solo funcionarios: la entidad a la que pertenecen; solo ven y atienden los reportes de esa entidad. */
   entidad?: string;
+  correo?: string;
+  /** Solo ciudadanos: la cuenta no puede iniciar sesión hasta verificar el código enviado al correo. */
+  verificada?: boolean;
 }
+
+const CODIGO_VERIFICACION = '123456';
 
 const USUARIOS: UsuarioMaqueta[] = [
   { id: 1, usuario: 'admin', nombre: 'Administrador del Sistema', perfil: 'ADMINI' },
   { id: 2, usuario: 'func.epmmop', nombre: 'Funcionario EPMMOP', perfil: 'FUNCIO', entidad: 'EPMMOP' },
-  { id: 3, usuario: 'ciudadano.demo', nombre: 'Ciudadano de Prueba', perfil: 'CIUDAD' },
+  { id: 3, usuario: 'ciudadano.demo', nombre: 'Ciudadano de Prueba', perfil: 'CIUDAD', correo: 'ciudadano.demo@correo.com', verificada: true },
   { id: 4, usuario: 'func.policia', nombre: 'Funcionario Policía', perfil: 'FUNCIO', entidad: 'POLICIA' },
+  { id: 5, usuario: 'func.amt', nombre: 'Funcionario AMT', perfil: 'FUNCIO', entidad: 'AMT' },
+  { id: 6, usuario: 'func.eeq', nombre: 'Funcionario EEQ', perfil: 'FUNCIO', entidad: 'EEQ' },
+  { id: 7, usuario: 'func.bomberos', nombre: 'Funcionario Bomberos', perfil: 'FUNCIO', entidad: 'BOMBEROS' },
+  { id: 8, usuario: 'ciudadana.apoyo', nombre: 'Ciudadana de Apoyo', perfil: 'CIUDAD', correo: 'ciudadana.apoyo@correo.com', verificada: true },
 ];
 
 const entidades: EntidadAdmin[] = [
@@ -69,11 +79,15 @@ const tipos: TipoIncidenteAdmin[] = [
 const funcionarios: Funcionario[] = [
   { id: 1, usuario: 'func.epmmop', nombreCompleto: 'Funcionario EPMMOP', cedula: '1712345678', correo: 'funcionario.epmmop@entidad.gob.ec', idEntidad: 1, entidadCodigo: 'EPMMOP', entidadNombre: entidades[0].nombre, cargo: 'Inspector vial', estado: 'A', fechaDesignacion: hace(24 * 12) },
   { id: 2, usuario: 'func.policia', nombreCompleto: 'Funcionario Policía', cedula: '1798765432', correo: 'funcionario.policia@entidad.gob.ec', idEntidad: 4, entidadCodigo: 'POLICIA', entidadNombre: entidades[3].nombre, cargo: 'Operador de despacho', estado: 'A', fechaDesignacion: hace(24 * 12) },
-  { id: 3, usuario: 'func.amt', nombreCompleto: 'Funcionario AMT', cedula: '1701234567', correo: 'funcionario.amt@entidad.gob.ec', idEntidad: 2, entidadCodigo: 'AMT', entidadNombre: entidades[1].nombre, cargo: 'Agente de control', estado: 'I', fechaDesignacion: hace(24 * 8) },
+  { id: 3, usuario: 'func.amt', nombreCompleto: 'Funcionario AMT', cedula: '1701234567', correo: 'funcionario.amt@entidad.gob.ec', idEntidad: 2, entidadCodigo: 'AMT', entidadNombre: entidades[1].nombre, cargo: 'Agente de control', estado: 'A', fechaDesignacion: hace(24 * 10) },
+  { id: 4, usuario: 'func.eeq', nombreCompleto: 'Funcionario EEQ', cedula: '1709988776', correo: 'funcionario.eeq@entidad.gob.ec', idEntidad: 3, entidadCodigo: 'EEQ', entidadNombre: entidades[2].nombre, cargo: 'Supervisor de alumbrado', estado: 'A', fechaDesignacion: hace(24 * 9) },
+  { id: 5, usuario: 'func.bomberos', nombreCompleto: 'Funcionario Bomberos', cedula: '1703344556', correo: 'funcionario.bomberos@entidad.gob.ec', idEntidad: 5, entidadCodigo: 'BOMBEROS', entidadNombre: entidades[4].nombre, cargo: 'Operador de emergencias', estado: 'A', fechaDesignacion: hace(24 * 9) },
 ];
 
 interface ReporteMaqueta {
   id: number;
+  /** Ciudadano que lo envió: cada ciudadano solo ve sus propios reportes. */
+  autor: string;
   tipoId: number;
   estado: EstadoReporte;
   descripcion: string;
@@ -99,31 +113,33 @@ function nuevoHistorial(pasos: [EstadoReporte, string, number, string | null][])
 
 const reportes: ReporteMaqueta[] = [
   {
-    id: 1, tipoId: 5, estado: 'EN_ATENCION', descripcion: 'El semáforo está apagado y los autos no respetan el paso.',
+    id: 1, autor: 'ciudadano.demo', tipoId: 5, estado: 'EN_ATENCION', descripcion: 'El semáforo está apagado y los autos no respetan el paso.',
     latitud: -0.2013, longitud: -78.4975, direccion: 'Av. 10 de Agosto y Colón', referencia: 'Frente a la gasolinera', creado: hace(30), actualizado: hace(6),
     historial: nuevoHistorial([['REGISTRADO', 'ciudadano.demo', 30, null], ['EN_REVISION', 'func.epmmop', 24, 'Se revisará el controlador.'], ['EN_ATENCION', 'func.epmmop', 6, 'Cuadrilla en el sitio.']]),
     evidencias: [{ id: 1, tipo: 'CREACION', nombreArchivo: 'semaforo.jpg', subidoPor: 'ciudadano.demo', fecha: hace(30), foto: 0 }],
   },
   {
-    id: 2, tipoId: 3, estado: 'EN_REVISION', descripcion: 'Bache grande en el carril derecho que ya dañó llantas.',
+    id: 2, autor: 'ciudadano.demo', tipoId: 3, estado: 'EN_REVISION', descripcion: 'Bache grande en el carril derecho que ya dañó llantas.',
     latitud: -0.1807, longitud: -78.4836, direccion: 'Av. Amazonas y Naciones Unidas', referencia: null, creado: hace(52), actualizado: hace(20),
     historial: nuevoHistorial([['REGISTRADO', 'ciudadano.demo', 52, null], ['EN_REVISION', 'func.epmmop', 20, 'Se programa visita.']]),
     evidencias: [{ id: 2, tipo: 'CREACION', nombreArchivo: 'bache.jpg', subidoPor: 'ciudadano.demo', fecha: hace(52), foto: 1 }],
   },
   {
-    id: 3, tipoId: 4, estado: 'REGISTRADO', descripcion: 'Asaltaron a una persona en la parada del bus.',
-    latitud: -0.249, longitud: -78.5215, direccion: 'Av. Maldonado y Cusubamba', referencia: 'Parada del trolebús', creado: hace(3), actualizado: hace(3),
-    historial: nuevoHistorial([['REGISTRADO', 'ciudadano.demo', 3, null]]),
-    evidencias: [{ id: 3, tipo: 'CREACION', nombreArchivo: 'parada.jpg', subidoPor: 'ciudadano.demo', fecha: hace(3), foto: 2 }],
+    // Emergencia enviada SIN foto: pedir ayuda no debe esperar a tomar una fotografía.
+    id: 3, autor: 'ciudadano.demo', tipoId: 4, estado: 'EN_ATENCION', descripcion: 'Asaltaron a una persona en la parada del bus.',
+    latitud: -0.249, longitud: -78.5215, direccion: 'Av. Maldonado y Cusubamba', referencia: 'Parada del trolebús', creado: hace(3), actualizado: hace(2.5),
+    historial: nuevoHistorial([['REGISTRADO', 'ciudadano.demo', 3, 'Alerta enviada sin foto (emergencia).'], ['EN_ATENCION', 'func.policia', 2.5, 'Unidad asignada (simulado).']]),
+    evidencias: [],
   },
   {
-    id: 4, tipoId: 7, estado: 'REGISTRADO', descripcion: 'Árbol caído que obstruye medio carril.',
-    latitud: -0.143, longitud: -78.495, direccion: 'Av. Occidental y Mariscal Sucre', referencia: null, creado: hace(8), actualizado: hace(8),
-    historial: nuevoHistorial([['REGISTRADO', 'ciudadano.demo', 8, null]]),
-    evidencias: [{ id: 4, tipo: 'CREACION', nombreArchivo: 'arbol.jpg', subidoPor: 'ciudadano.demo', fecha: hace(8), foto: 3 }],
+    // Sin respuesta: lleva más de 48 h en "Registrado"; el sistema lo marca para dar seguimiento.
+    id: 4, autor: 'ciudadano.demo', tipoId: 7, estado: 'REGISTRADO', descripcion: 'Árbol caído que obstruye medio carril.',
+    latitud: -0.143, longitud: -78.495, direccion: 'Av. Occidental y Mariscal Sucre', referencia: null, creado: hace(62), actualizado: hace(62),
+    historial: nuevoHistorial([['REGISTRADO', 'ciudadano.demo', 62, null]]),
+    evidencias: [{ id: 4, tipo: 'CREACION', nombreArchivo: 'arbol.jpg', subidoPor: 'ciudadano.demo', fecha: hace(62), foto: 3 }],
   },
   {
-    id: 5, tipoId: 6, estado: 'RESUELTO', descripcion: 'La señal de pare está doblada y no se ve.',
+    id: 5, autor: 'ciudadano.demo', tipoId: 6, estado: 'RESUELTO', descripcion: 'La señal de pare está doblada y no se ve.',
     latitud: -0.215, longitud: -78.505, direccion: 'Av. Maldonado y Cusubamba', referencia: null, creado: hace(96), actualizado: hace(40),
     historial: nuevoHistorial([['REGISTRADO', 'ciudadano.demo', 96, null], ['EN_REVISION', 'func.epmmop', 80, null], ['EN_ATENCION', 'func.epmmop', 60, 'Se repone la señal.'], ['RESUELTO', 'func.epmmop', 40, 'Señal repuesta.']]),
     evidencias: [
@@ -132,25 +148,32 @@ const reportes: ReporteMaqueta[] = [
     ],
   },
   {
-    id: 6, tipoId: 2, estado: 'EN_REVISION', descripcion: 'Tres luminarias apagadas en toda la cuadra.',
+    id: 6, autor: 'ciudadano.demo', tipoId: 2, estado: 'EN_REVISION', descripcion: 'Tres luminarias apagadas en toda la cuadra.',
     latitud: -0.186, longitud: -78.481, direccion: 'Av. República y Eloy Alfaro', referencia: null, creado: hace(20), actualizado: hace(10),
-    historial: nuevoHistorial([['REGISTRADO', 'ciudadano.demo', 20, null], ['EN_REVISION', 'func.epmmop', 10, null]]),
+    historial: nuevoHistorial([['REGISTRADO', 'ciudadano.demo', 20, null], ['EN_REVISION', 'func.eeq', 10, null]]),
     evidencias: [{ id: 7, tipo: 'CREACION', nombreArchivo: 'luminaria.jpg', subidoPor: 'ciudadano.demo', fecha: hace(20), foto: 1 }],
   },
   {
-    id: 7, tipoId: 1, estado: 'EN_ATENCION', descripcion: 'Choque entre dos autos que bloquea el carril izquierdo.',
+    id: 7, autor: 'ciudadano.demo', tipoId: 1, estado: 'EN_ATENCION', descripcion: 'Choque entre dos autos que bloquea el carril izquierdo.',
     latitud: -0.155, longitud: -78.46, direccion: 'Av. Simón Bolívar y Panamericana Norte', referencia: null, creado: hace(5), actualizado: hace(2),
-    historial: nuevoHistorial([['REGISTRADO', 'ciudadano.demo', 5, null], ['EN_ATENCION', 'func.epmmop', 2, 'Agentes en camino.']]),
+    historial: nuevoHistorial([['REGISTRADO', 'ciudadano.demo', 5, null], ['EN_ATENCION', 'func.amt', 2, 'Agentes asignados (simulado).']]),
     evidencias: [{ id: 8, tipo: 'CREACION', nombreArchivo: 'choque.jpg', subidoPor: 'ciudadano.demo', fecha: hace(5), foto: 2 }],
   },
   {
-    id: 8, tipoId: 3, estado: 'RESUELTO', descripcion: 'Bache en la entrada del colegio.',
+    id: 8, autor: 'ciudadano.demo', tipoId: 3, estado: 'RESUELTO', descripcion: 'Bache en la entrada del colegio.',
     latitud: -0.1795, longitud: -78.489, direccion: 'Calle Rumipamba', referencia: null, creado: hace(120), actualizado: hace(70),
     historial: nuevoHistorial([['REGISTRADO', 'ciudadano.demo', 120, null], ['EN_REVISION', 'func.epmmop', 100, null], ['EN_ATENCION', 'func.epmmop', 90, null], ['RESUELTO', 'func.epmmop', 70, 'Bache reparado.']]),
     evidencias: [
       { id: 9, tipo: 'CREACION', nombreArchivo: 'bache2.jpg', subidoPor: 'ciudadano.demo', fecha: hace(120), foto: 3 },
       { id: 10, tipo: 'RESOLUCION', nombreArchivo: 'reparado.jpg', subidoPor: 'func.epmmop', fecha: hace(70), foto: 4 },
     ],
+  },
+  {
+    // Duplicado: otra ciudadana reportó el mismo asalto; la policía lo rechaza indicando el reporte original.
+    id: 9, autor: 'ciudadana.apoyo', tipoId: 4, estado: 'RECHAZADO', descripcion: 'Vi un asalto en la parada de Maldonado.',
+    latitud: -0.2491, longitud: -78.5214, direccion: 'Av. Maldonado y Cusubamba', referencia: null, creado: hace(2.8), actualizado: hace(2.4),
+    historial: nuevoHistorial([['REGISTRADO', 'ciudadana.apoyo', 2.8, null], ['RECHAZADO', 'func.policia', 2.4, 'Duplicado del reporte RQ-2026-000003, que ya está en atención.']]),
+    evidencias: [],
   },
 ];
 
@@ -177,6 +200,16 @@ function usuarioActual(): UsuarioMaqueta | null {
     return null;
   }
 }
+
+/** Regla de acceso: un funcionario solo ve y actualiza los reportes de su entidad; un ciudadano, solo los suyos. */
+function puedeVer(yo: UsuarioMaqueta | null, r: ReporteMaqueta): boolean {
+  if (!yo) return false;
+  if (yo.perfil === 'ADMINI') return true;
+  if (yo.perfil === 'CIUDAD') return r.autor === yo.usuario;
+  return tipoDe(r.tipoId).entidadCodigo === yo.entidad;
+}
+
+const NO_AUTORIZADO = 'No tiene autorización para este reporte: pertenece a otra entidad o a otra persona.';
 
 function tipoDe(id: number): TipoIncidenteAdmin {
   return tipos.find((t) => t.id === id) ?? tipos[0];
@@ -205,7 +238,7 @@ function detalle(r: ReporteMaqueta) {
   return {
     reporte: resumen(r),
     referencia: r.referencia,
-    ciudadano: 'Ciudadano de Prueba',
+    ciudadano: USUARIOS.find((u) => u.usuario === r.autor)?.nombre ?? r.autor,
     entidadNombre: tipo.entidadNombre,
     historial: r.historial,
     evidencias: r.evidencias.map(({ id, tipo: t, nombreArchivo, subidoPor, fecha }) => ({ id, tipo: t, nombreArchivo, subidoPor, fecha })),
@@ -220,6 +253,12 @@ function recalcular(): void {
   for (const t of tipos) {
     t.reportes = reportes.filter((r) => r.tipoId === t.id).length;
   }
+}
+
+function ocultarCorreo(correo?: string): string {
+  if (!correo) return 'su correo registrado';
+  const [local, dominio] = correo.split('@');
+  return `${local.slice(0, 2)}***@${dominio}`;
 }
 
 function claveTemporal(): string {
@@ -258,9 +297,32 @@ export const maquetaInterceptor: HttpInterceptorFn = (req, next) => {
     const { usuario, password } = req.body as { usuario: string; password: string };
     const u = USUARIOS.find((x) => x.usuario === (usuario ?? '').trim().toLowerCase());
     if (!u || !password) return fallo(401, 'Usuario y/o contraseña incorrectos.');
+    if (u.perfil === 'CIUDAD' && u.verificada === false) {
+      return throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 403,
+            error: { mensaje: 'Su cuenta aún no está verificada. Ingrese el código que enviamos a su correo.', codigo: 'CUENTA_SIN_VERIFICAR', correo: ocultarCorreo(u.correo) },
+          }),
+      );
+    }
     return ok({ idUsuario: u.id, usuario: u.usuario, nombre: u.nombre, perfiles: [u.perfil], token: `prototipo.${u.usuario}`, expiraEnSegundos: 7200, debeCambiarPassword: false });
   }
-  if (metodo === 'POST' && ruta === '/auth/registro') return ok(null, 201);
+  if (metodo === 'POST' && ruta === '/auth/registro') {
+    const d = req.body as { nombreCompleto: string; correo: string; usuario: string };
+    if (USUARIOS.some((x) => x.usuario === d.usuario.toLowerCase())) return fallo(409, 'Ya existe un usuario con ese nombre.');
+    USUARIOS.push({ id: USUARIOS.length + 1, usuario: d.usuario.toLowerCase(), nombre: d.nombreCompleto, perfil: 'CIUDAD', correo: d.correo, verificada: false });
+    return ok(null, 201);
+  }
+  if (metodo === 'POST' && ruta === '/auth/verificar-cuenta') {
+    const { usuario, codigo } = req.body as { usuario: string; codigo: string };
+    const u = USUARIOS.find((x) => x.usuario === (usuario ?? '').toLowerCase());
+    if (!u) return fallo(404, 'No se encontró la cuenta.');
+    if (codigo !== CODIGO_VERIFICACION) return fallo(400, 'El código es incorrecto o ya venció. Solicite uno nuevo.');
+    u.verificada = true;
+    return ok({ idUsuario: u.id, usuario: u.usuario, nombre: u.nombre, perfiles: [u.perfil], token: `prototipo.${u.usuario}`, expiraEnSegundos: 7200, debeCambiarPassword: false });
+  }
+  if (metodo === 'POST' && ruta === '/auth/reenviar-codigo') return ok({ mensaje: 'Código reenviado.' });
   if (metodo === 'POST' && ruta === '/auth/olvide-password') return ok({ mensaje: 'Si la cuenta existe, le enviaremos un enlace a su correo.' }, 202);
   if (metodo === 'POST' && ruta === '/auth/restablecer-password') return ok({ mensaje: 'Contraseña actualizada.' });
   if (metodo === 'POST' && ruta === '/auth/cambiar-password' && yo) {
@@ -277,7 +339,7 @@ export const maquetaInterceptor: HttpInterceptorFn = (req, next) => {
 
   // ----- reportes
   if (metodo === 'GET' && ruta === '/reportes/mios') {
-    return ok([...reportes].sort((a, b) => b.creado.localeCompare(a.creado)).map(resumen));
+    return ok(reportes.filter((r) => puedeVer(yo, r)).sort((a, b) => b.creado.localeCompare(a.creado)).map(resumen));
   }
   if (metodo === 'GET' && ruta === '/reportes/bandeja') {
     const cerrados = req.params.get('incluirCerrados') === 'true';
@@ -290,12 +352,14 @@ export const maquetaInterceptor: HttpInterceptorFn = (req, next) => {
   }
   if (metodo === 'GET' && (m = ruta.match(/^\/reportes\/(\d+)$/))) {
     const r = reportes.find((x) => x.id === +m![1]);
-    return r ? ok(detalle(r)) : fallo(404, 'No se encontró el reporte.');
+    if (!r) return fallo(404, 'No se encontró el reporte.');
+    return puedeVer(yo, r) ? ok(detalle(r)) : fallo(403, NO_AUTORIZADO);
   }
   if (metodo === 'GET' && (m = ruta.match(/^\/reportes\/(\d+)\/evidencias\/(\d+)\/archivo$/))) {
     const r = reportes.find((x) => x.id === +m![1]);
     const e = r?.evidencias.find((x) => x.id === +m![2]);
-    if (!e) return fallo(404, 'No se encontró la evidencia.');
+    if (!r || !e) return fallo(404, 'No se encontró la evidencia.');
+    if (!puedeVer(yo, r)) return fallo(403, NO_AUTORIZADO);
     if (e.archivo) return ok(e.archivo);
     return from(fetch(FOTOS[e.foto % FOTOS.length]).then((resp) => resp.blob())).pipe(switchMap((blob) => ok(blob)));
   }
@@ -304,18 +368,25 @@ export const maquetaInterceptor: HttpInterceptorFn = (req, next) => {
     const datosBlob = form?.get('datos');
     const foto = form?.get('foto');
     if (!(datosBlob instanceof Blob)) return fallo(400, 'Faltan los datos del reporte.');
-    if (!(foto instanceof File)) return fallo(400, 'La foto del incidente es obligatoria.');
+    if (yo?.perfil !== 'CIUDAD') return fallo(403, 'Solo los ciudadanos pueden enviar reportes.');
     return from(datosBlob.text()).pipe(
       switchMap((texto) => {
         const d = JSON.parse(texto) as { idTipoIncidente: number; descripcion: string; latitud: number; longitud: number; direccion: string; referencia: string };
+        // La foto es obligatoria, salvo en emergencias (robo o asalto, accidente): ahí el reporte sale de inmediato.
+        if (!(foto instanceof File) && !tipoDe(d.idTipoIncidente).esEmergencia) {
+          return fallo(400, 'La foto del incidente es obligatoria. Solo en emergencias se puede enviar sin foto.');
+        }
         contadorReportes += 1;
-        contadorEvidencias += 1;
         const nuevo: ReporteMaqueta = {
-          id: contadorReportes, tipoId: d.idTipoIncidente, estado: 'REGISTRADO', descripcion: d.descripcion || '(sin detalle)', latitud: d.latitud, longitud: d.longitud,
+          id: contadorReportes, autor: yo?.usuario ?? 'ciudadano.demo', tipoId: d.idTipoIncidente, estado: 'REGISTRADO', descripcion: d.descripcion || '(sin detalle)', latitud: d.latitud, longitud: d.longitud,
           direccion: d.direccion || 'Ubicación marcada en el mapa', referencia: d.referencia || null, creado: new Date().toISOString(), actualizado: new Date().toISOString(),
-          historial: [{ estadoAnterior: null, estadoNuevo: 'REGISTRADO', usuario: yo?.usuario ?? 'ciudadano.demo', comentario: null, fecha: new Date().toISOString() }],
-          evidencias: [{ id: contadorEvidencias, tipo: 'CREACION', nombreArchivo: foto.name, subidoPor: yo?.usuario ?? 'ciudadano.demo', fecha: new Date().toISOString(), foto: 0, archivo: foto }],
+          historial: [{ estadoAnterior: null, estadoNuevo: 'REGISTRADO', usuario: yo?.usuario ?? 'ciudadano.demo', comentario: foto instanceof File ? null : 'Alerta enviada sin foto (emergencia).', fecha: new Date().toISOString() }],
+          evidencias: [],
         };
+        if (foto instanceof File) {
+          contadorEvidencias += 1;
+          nuevo.evidencias.push({ id: contadorEvidencias, tipo: 'CREACION', nombreArchivo: foto.name, subidoPor: yo?.usuario ?? 'ciudadano.demo', fecha: new Date().toISOString(), foto: 0, archivo: foto });
+        }
         reportes.push(nuevo);
         recalcular();
         return ok(detalle(nuevo), 201);
@@ -326,6 +397,7 @@ export const maquetaInterceptor: HttpInterceptorFn = (req, next) => {
     const r = reportes.find((x) => x.id === +m![1]);
     const form = leerFormulario(req);
     if (!r || !form) return fallo(404, 'No se encontró el reporte.');
+    if (yo?.perfil !== 'FUNCIO' || !puedeVer(yo, r)) return fallo(403, NO_AUTORIZADO);
     const nuevoEstado = String(form.get('estado')) as EstadoReporte;
     const comentario = (form.get('comentario') as string | null) || null;
     const foto = form.get('foto');
@@ -343,8 +415,10 @@ export const maquetaInterceptor: HttpInterceptorFn = (req, next) => {
 
   // ----- administración
   if (ruta === '/admin/estadisticas' && metodo === 'GET') {
-    const est: Estadisticas = { total: reportes.length, porEstado: {}, porTipo: {} };
+    const est: Estadisticas = { total: reportes.length, porEstado: {}, porTipo: {}, sinRespuesta: 0 };
     for (const r of reportes) {
+      const horas = (Date.now() - new Date(r.creado).getTime()) / HORA;
+      if (r.estado === 'REGISTRADO' && horas > (tipoDe(r.tipoId).prioridadBase === 1 ? 0.5 : 48)) est.sinRespuesta = (est.sinRespuesta ?? 0) + 1;
       est.porEstado[r.estado] = (est.porEstado[r.estado] ?? 0) + 1;
       const n = tipoDe(r.tipoId).nombre;
       est.porTipo[n] = (est.porTipo[n] ?? 0) + 1;

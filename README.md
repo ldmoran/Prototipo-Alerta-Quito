@@ -6,8 +6,8 @@ Es solo la parte visual: **no hay servidor ni base de datos**. Todas las llamada
 maqueta (`src/app/core/maqueta.interceptor.ts`) con datos de ejemplo que viven en el navegador. Al recargar la página los
 datos vuelven a su estado inicial.
 
-> Este repositorio contiene **solo el prototipo de la interfaz**.
-> La versión con servicio y bases de datos está en https://github.com/ldmoran/quito-reporta
+> Esta rama (`dev`) contiene **solo el prototipo de la interfaz** y no tiene relación con `main`.
+> La versión con servicio y bases de datos está en la rama `main` y esta rama no la modifica.
 
 ## Cómo verlo
 

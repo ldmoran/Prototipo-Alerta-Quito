@@ -49,6 +49,12 @@ interface Foto {
         @if (d.reporte.descripcion) {
           <p>{{ d.reporte.descripcion }}</p>
         }
+        @if (auth.tienePerfil('CIUDAD') && (d.reporte.estado === 'REGISTRADO' || d.reporte.estado === 'EN_REVISION')) {
+          <div class="alert alert-secondary py-2 small" role="note">
+            Su reporte fue recibido y derivado a {{ d.entidadNombre }}. La entidad lo atenderá según su disponibilidad: el sistema
+            no garantiza un tiempo de respuesta. Aquí puede ver su estado en todo momento.
+          </div>
+        }
         <p class="text-muted">
           <i class="fa fa-map-marker me-1" aria-hidden="true"></i>
           {{ d.reporte.direccion || 'Sin dirección' }}@if (d.referencia) {
@@ -84,6 +90,10 @@ interface Foto {
 
         @if (puedeGestionar() && siguientes().length > 0) {
           <h4 class="subtitulo">Atender reporte</h4>
+          <p class="text-muted small">
+            Si ya existe un reporte del mismo hecho, pase este a <strong>Rechazado</strong> e indique en el comentario el código del
+            reporte original (duplicado). El ciudadano verá ese comentario y podrá seguir el original.
+          </p>
           <div class="row g-3">
             <div class="col-md-4">
               <label class="form-label" for="nuevoEstado">Nuevo estado</label>

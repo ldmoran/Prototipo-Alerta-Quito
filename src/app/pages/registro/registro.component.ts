@@ -14,7 +14,7 @@ import { RequisitosClaveComponent } from '../../shared/requisitos-clave.componen
   template: `
     <app-fondo-acceso>
       <h1>Crear cuenta</h1>
-      <p>Registro de ciudadanos para reportar incidentes.</p>
+      <p>Registro de ciudadanos para reportar incidentes. Después de crear la cuenta deberá verificarla con un código enviado a su correo.</p>
 
       <form [formGroup]="form" (ngSubmit)="registrar()" novalidate>
         <div class="input-group login-input">
@@ -101,11 +101,8 @@ export class RegistroComponent {
     this.error.set('');
     const datos = this.form.getRawValue();
     this.auth.registrar(datos).subscribe({
-      next: () =>
-        this.auth.login(datos.usuario, datos.password).subscribe({
-          next: () => void this.router.navigate([this.auth.rutaInicio()]),
-          error: () => void this.router.navigate(['/login']),
-        }),
+      // La cuenta queda pendiente: primero se verifica el correo con un código.
+      next: () => void this.router.navigate(['/verificar-cuenta'], { queryParams: { usuario: datos.usuario, correo: datos.correo } }),
       error: (e) => {
         this.error.set(mensajeDeError(e));
         this.cargando.set(false);

@@ -40,6 +40,20 @@ export class AuthService {
     return this.http.post<{ mensaje: string }>(`${environment.apiUrl}/auth/restablecer-password`, { token, passwordNueva });
   }
 
+  /** Confirma el código de 6 dígitos enviado al correo; si es correcto, la cuenta queda activa y se inicia sesión. */
+  verificarCuenta(usuario: string, codigo: string): Observable<RespuestaAuth> {
+    return this.http.post<RespuestaAuth>(`${environment.apiUrl}/auth/verificar-cuenta`, { usuario, codigo });
+  }
+
+  /** Inicia la sesión con la respuesta de una verificación de cuenta correcta. */
+  abrirSesion(r: RespuestaAuth): void {
+    this.guardar(r);
+  }
+
+  reenviarCodigo(usuario: string): Observable<{ mensaje: string }> {
+    return this.http.post<{ mensaje: string }>(`${environment.apiUrl}/auth/reenviar-codigo`, { usuario });
+  }
+
   registrar(datos: RegistroCiudadano): Observable<void> {
     return this.http.post<void>(`${environment.apiUrl}/auth/registro`, datos);
   }
